@@ -1,0 +1,264 @@
+<div style="border: 1px solid black">
+  <h2> Filter </h2>
+  <hr />
+  <h2>Search</h2>
+  <div>
+    <input type="text" placeholder="Search invoice, order, customer or SKU..." [formControl]="searchControl" />
+  </div>
+  <br />
+
+  <h2>MonthPicker</h2>
+  <input type="month" [formControl]="monthControl" />
+
+  <h2>Marketplace</h2>
+  <select [formControl]="marketplaceControl">
+    <option value="">All Marketplaces</option>
+    @for(marketplace of marketplaces; track marketplace) {
+      <option [value]="marketplace">{{marketplace}}</option>
+    }
+  </select>
+</div>
+
+<br />
+
+<h2>Upload Invoice</h2>
+
+<input type="file" accept=".pdf" multiple (change)="onSelectedFiles($event)">
+
+<!-- @if (selectedFile) { -->
+@if(selectedFiles.length > 0) {
+
+<p>
+  Selected files:
+  {{ selectedFiles.length}}
+</p>
+
+@for (file of selectedFiles; track file.name) {
+<p>{{ file.name }}</p>
+}
+
+
+<!-- <button type="button">
+    Upload Invoice
+  </button> -->
+
+@if (!isUploading) {
+<button type="button" (click)="uploadBulkInvoices()">
+  <!-- (click)="uploadInvoice()" -->
+  Upload Invoice
+</button>
+
+} @else {
+<div class="loader-container">
+  <div class="loader"></div>
+  <!-- <span>Processing invoice...</span> -->
+  <span>
+    Processing {{ currentFileName }}
+    ({{ uploadProgress }}%)
+  </span>
+</div>
+}
+}
+
+@if (!isUploading && successfulFiles.length > 0 || failedFiles.length > 0) {
+
+<div class="upload-summary">
+
+  <h3>Bulk Upload Complete</h3>
+
+  <p>
+    ✅ Successful: {{ successfulFiles.length }}
+  </p>
+
+  @if (failedFiles.length > 0) {
+
+  <p>
+    ❌ Failed: {{ failedFiles.length }}
+  </p>
+
+  <h4>Failed Files:</h4>
+
+  @for (file of failedFiles; track file.name) {
+  <p>• {{ file.name }}</p>
+  }
+
+  <!-- @if (failedFiles.length > 0) {
+  <button type="button" (click)="retryFailedInvoices()">
+    Retry Failed
+  </button>
+  } -->
+
+  @if (!isUploading && failedFiles.length > 0) {
+  <button type="button" (click)="retryFailedInvoices()">
+    Retry Failed ({{ failedFiles.length }})
+  </button>
+  }
+
+  }
+
+</div>
+}
+
+<h2>Invoices</h2>
+
+<table border="1" cellpadding="10" cellspacing="0">
+
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Marketplace</th>
+      <th>Invoice No</th>
+      <th>Order ID</th>
+      <th>Customer</th>
+      <th>SKU</th>
+      <th>Quantity</th>
+      <th>Total Amount</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+    @for (invoice of invoices; track invoice.id) {
+
+    <tr (click)="viewInvoice(invoice)">
+
+      <td>{{ invoice.id }}</td>
+
+      <td>{{ invoice.marketplace }}</td>
+
+      <td>{{ invoice.invoice_no }}</td>
+
+      <td>{{ invoice.order_id }}</td>
+
+      <td>{{ invoice.customer_name }}</td>
+
+      <td>{{ invoice.sku }}</td>
+
+      <td>{{ invoice.quantity }}</td>
+
+      <td>{{ invoice.total_amount }}</td>
+
+    </tr>
+
+    }
+
+  </tbody>
+</table>
+
+@if (selectedInvoice) {
+
+<h2>Invoice Details</h2>
+
+<p>
+  <strong>Marketplace:</strong>
+  {{ selectedInvoice.marketplace }}
+</p>
+
+<p>
+  <strong>Invoice No:</strong>
+  {{ selectedInvoice.invoice_no }}
+</p>
+
+<p>
+  <strong>Order ID:</strong>
+  {{ selectedInvoice.order_id }}
+</p>
+
+<p>
+  <strong>Customer:</strong>
+  {{ selectedInvoice.customer_name }}
+</p>
+
+<p>
+  <strong>Address:</strong>
+  {{ selectedInvoice.customer_address }}
+</p>
+
+<p>
+  <strong>SKU:</strong>
+  {{ selectedInvoice.sku }}
+</p>
+
+<p>
+  <strong>Product:</strong>
+  {{ selectedInvoice.product_name }}
+</p>
+
+<p>
+  <strong>HSN:</strong>
+  {{ selectedInvoice.hsn }}
+</p>
+
+<p>
+  <strong>Quantity:</strong>
+  {{ selectedInvoice.quantity }}
+</p>
+
+<p>
+  <strong>GST Rate:</strong>
+  {{ selectedInvoice.gst_rate }}
+</p>
+
+<p>
+  <strong>GST Amount:</strong>
+  {{ selectedInvoice.gst_amount }}
+</p>
+
+<p>
+  <strong>Total Amount:</strong>
+  {{ selectedInvoice.total_amount }}
+</p>
+
+}
+
+
+
+<div class="dashboard">
+
+  <div class="dashboard-card">
+    <span>Total Invoices</span>
+    <h2>{{ totalInvoices }}</h2>
+  </div>
+
+  <div class="dashboard-card">
+    <span>Total Sales</span>
+    <h2>₹{{ totalSales}}</h2>
+  </div>
+
+  <div class="dashboard-card">
+    <span>Total Tax</span>
+    <h2>₹{{ totalTax }}</h2>
+  </div>
+
+  <div class="dashboard-card">
+    <span>Total Quantity</span>
+    <h2>{{ totalQuantity }}</h2>
+  </div>
+
+</div>
+
+
+
+
+<div class="marketplace-dashboard">
+
+  <div class="marketplace-card">
+    <h3>Amazon</h3>
+    <p>Invoices: {{ amazonInvoices }}</p>
+    <strong>₹{{ amazonSales | number:'1.2-2' }}</strong>
+  </div>
+
+  <div class="marketplace-card">
+    <h3>Flipkart</h3>
+    <p>Invoices: {{ flipkartInvoices }}</p>
+    <strong>₹{{ flipkartSales | number:'1.2-2' }}</strong>
+  </div>
+
+  <div class="marketplace-card">
+    <h3>Meesho</h3>
+    <p>Invoices: {{ meeshoInvoices }}</p>
+    <strong>₹{{ meeshoSales | number:'1.2-2' }}</strong>
+  </div>
+
+</div>
+<router-outlet></router-outlet>
