@@ -13,6 +13,10 @@ An AI-powered invoice management application that extracts invoice information f
 - Retry failed invoice processing.
 - View and refresh invoice records.
 
+## Dashboard Preview
+
+![AI Invoice Management Dashboard](screenshots/dashboard.png)
+
 ## Tech Stack
 
 - **Frontend:** Angular, TypeScript, HTML, SCSS
